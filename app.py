@@ -7,14 +7,17 @@ st.set_page_config(page_title="WA Information Portal", page_icon="📚")
 st.title("2026 WA Information Portal")
 st.write("Parents can check their child's WA dates and topics.")
 
-# Load CSV safely
+# Load CSV
 file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026.csv")
 df = pd.read_csv(file_path)
 
-# Clean column names (removes hidden spaces from Excel)
+# Clean column names (remove spaces, weird characters)
 df.columns = df.columns.str.strip()
 
-# Rename columns just in case Excel renamed them
+# Show columns in logs (helps debugging)
+st.write("Loaded columns:", df.columns)
+
+# Rename columns safely
 df = df.rename(columns={
     df.columns[0]: "Index Number",
     df.columns[1]: "Class"
@@ -22,24 +25,21 @@ df = df.rename(columns={
 
 # Convert index numbers
 df["Index Number"] = pd.to_numeric(df["Index Number"], errors="coerce")
-
-# Remove rows with missing index
 df = df.dropna(subset=["Index Number"])
-
 df["Index Number"] = df["Index Number"].astype(int)
 
 st.divider()
 
-# Select class
+# Parent selects class
 class_input = st.selectbox(
     "Select your child's class",
     sorted(df["Class"].unique())
 )
 
-# Filter students from class
+# Filter students
 class_df = df[df["Class"] == class_input]
 
-# Select index number
+# Parent selects index
 index_input = st.selectbox(
     "Select your child's index number",
     sorted(class_df["Index Number"].unique())
@@ -51,14 +51,14 @@ if st.button("Show WA Information"):
 
     st.subheader("WA Schedule")
 
-    st.markdown(f"**English WA:** {student['English WA']}")
-    st.markdown(f"Topic: {student['English WA Topic']}")
+    st.write("English WA:", student["English WA"])
+    st.write("English Topic:", student["English WA Topic"])
 
-    st.markdown(f"**Math WA:** {student['Maths WA']}")
-    st.markdown(f"Topic: {student['Maths WA Topic']}")
+    st.write("Math WA:", student["Maths WA"])
+    st.write("Math Topic:", student["Maths WA Topic"])
 
-    st.markdown(f"**Science WA:** {student['Science WA']}")
-    st.markdown(f"Topic: {student['Science WA Topic']}")
+    st.write("Science WA:", student["Science WA"])
+    st.write("Science Topic:", student["Science WA Topic"])
 
-    st.markdown(f"**Mother Tongue WA:** {student['Mother Tongue WA']}")
-    st.markdown(f"Topic: {student['Mother Tongue WA Topic']}")
+    st.write("Mother Tongue WA:", student["Mother Tongue WA"])
+    st.write("Mother Tongue Topic:", student["Mother Tongue WA Topic"])
