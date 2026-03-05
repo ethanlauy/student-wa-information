@@ -1,63 +1,64 @@
 import streamlit as st
 import pandas as pd
+import os
 
 st.set_page_config(page_title="WA Information Portal", page_icon="📚")
 
 st.title("2026 WA Information Portal")
-
 st.write("Parents can check their child's WA dates and topics.")
 
-st.divider()
-
-# Load Excel file
-import os
-
+# Load CSV safely
 file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026.csv")
 df = pd.read_csv(file_path)
 
-# Clean column names
+# Clean column names (removes hidden spaces from Excel)
 df.columns = df.columns.str.strip()
 
+# Rename columns just in case Excel renamed them
+df = df.rename(columns={
+    df.columns[0]: "Index Number",
+    df.columns[1]: "Class"
+})
+
 # Convert index numbers
+df["Index Number"] = pd.to_numeric(df["Index Number"], errors="coerce")
+
+# Remove rows with missing index
+df = df.dropna(subset=["Index Number"])
+
 df["Index Number"] = df["Index Number"].astype(int)
 
-# User inputs
+st.divider()
+
+# Select class
 class_input = st.selectbox(
-    "Select Class",
+    "Select your child's class",
     sorted(df["Class"].unique())
 )
 
-index_input = st.number_input(
-    "Enter Index Number",
-    min_value=1,
-    max_value=40,
-    step=1
+# Filter students from class
+class_df = df[df["Class"] == class_input]
+
+# Select index number
+index_input = st.selectbox(
+    "Select your child's index number",
+    sorted(class_df["Index Number"].unique())
 )
 
-if st.button("Check WA Information"):
+if st.button("Show WA Information"):
 
-    student = df[
-        (df["Class"] == class_input) &
-        (df["Index Number"] == index_input)
-    ]
+    student = class_df[class_df["Index Number"] == index_input].iloc[0]
 
-    if not student.empty:
+    st.subheader("WA Schedule")
 
-        row = student.iloc[0]
+    st.markdown(f"**English WA:** {student['English WA']}")
+    st.markdown(f"Topic: {student['English WA Topic']}")
 
-        st.subheader("WA Schedule")
+    st.markdown(f"**Math WA:** {student['Maths WA']}")
+    st.markdown(f"Topic: {student['Maths WA Topic']}")
 
-        st.write("English WA:", row["English WA"])
-        st.write("Topic:", row["English WA Topic"])
+    st.markdown(f"**Science WA:** {student['Science WA']}")
+    st.markdown(f"Topic: {student['Science WA Topic']}")
 
-        st.write("Math WA:", row["Maths WA"])
-        st.write("Topic:", row["Maths WA Topic"])
-
-        st.write("Science WA:", row["Science WA"])
-        st.write("Topic:", row["Science WA Topic"])
-
-        st.write("Mother Tongue WA:", row["Mother Tongue WA"])
-        st.write("Topic:", row["Mother Tongue WA Topic"])
-
-    else:
-        st.error("Student not found.")
+    st.markdown(f"**Mother Tongue WA:** {student['Mother Tongue WA']}")
+    st.markdown(f"Topic: {student['Mother Tongue WA Topic']}")
