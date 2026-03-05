@@ -7,9 +7,9 @@ st.set_page_config(page_title="WA Information Portal", page_icon="📚")
 st.title("2026 WA Information Portal")
 st.write("Parents can check their child's WA dates and topics.")
 
-# Load CSV file
-file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026.csv")
-df = pd.read_csv(file_path, skiprows=1)
+# Load CSV file (using your exact filename)
+file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026(Sheet1).csv")
+df = pd.read_csv(file_path)
 
 # Clean column names
 df.columns = df.columns.str.strip()
@@ -21,47 +21,63 @@ df["Index Number"] = df["Index Number"].astype(int)
 
 st.divider()
 
-# Select class
-class_input = st.selectbox(
-    "Select your child's class",
-    sorted(df["Class"].unique())
-)
+# Parent inputs
+class_input = st.text_input("Enter your child's class (Example: 3P)")
+index_input = st.text_input("Enter your child's index number")
+name_input = st.text_input("Enter your child's name")
 
-# Filter class
-class_df = df[df["Class"] == class_input]
+if st.button("Check WA Schedule"):
 
-# Select index number
-index_input = st.selectbox(
-    "Select your child's index number",
-    sorted(class_df["Index Number"].unique())
-)
+    if class_input == "" or index_input == "" or name_input == "":
+        st.error("Please fill in all fields.")
 
-if st.button("Show WA Information"):
+    else:
 
-    student = class_df[class_df["Index Number"] == index_input].iloc[0]
+        try:
+            index_input = int(index_input)
 
-    st.subheader("WA Schedule")
+            student = df[
+                (df["Class"].str.lower() == class_input.lower()) &
+                (df["Index Number"] == index_input) &
+                (df["Name"].str.lower() == name_input.lower())
+            ]
 
-    col1, col2 = st.columns(2)
+            if student.empty:
+                st.error("The details entered are incorrect. Please check again.")
 
-    with col1:
-        with st.container(border=True):
-            st.markdown("### English")
-            st.write("Date:", student["English WA"])
-            st.write("Topic:", student["English WA Topic"])
+            else:
 
-        with st.container(border=True):
-            st.markdown("### Science")
-            st.write("Date:", student["Science WA"])
-            st.write("Topic:", student["Science WA Topic"])
+                student = student.iloc[0]
 
-    with col2:
-        with st.container(border=True):
-            st.markdown("### Math")
-            st.write("Date:", student["Maths WA"])
-            st.write("Topic:", student["Maths WA Topic"])
+                st.success("Student verified successfully.")
 
-        with st.container(border=True):
-            st.markdown("### Mother Tongue")
-            st.write("Date:", student["Mother Tongue WA"])
-            st.write("Topic:", student["Mother Tongue WA Topic"])
+                st.subheader("WA Schedule")
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+
+                    with st.container(border=True):
+                        st.markdown("### English")
+                        st.write("Date:", student["English WA"])
+                        st.write("Topic:", student["English WA Topic"])
+
+                    with st.container(border=True):
+                        st.markdown("### Science")
+                        st.write("Date:", student["Science WA"])
+                        st.write("Topic:", student["Science WA Topic"])
+
+                with col2:
+
+                    with st.container(border=True):
+                        st.markdown("### Mathematics")
+                        st.write("Date:", student["Maths WA"])
+                        st.write("Topic:", student["Maths WA Topic"])
+
+                    with st.container(border=True):
+                        st.markdown("### Mother Tongue")
+                        st.write("Date:", student["Mother Tongue WA"])
+                        st.write("Topic:", student["Mother Tongue WA Topic"])
+
+        except:
+            st.error("Index number must be a number.")
