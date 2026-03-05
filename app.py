@@ -7,17 +7,12 @@ st.set_page_config(page_title="WA Information Portal", page_icon="📚")
 st.title("2026 WA Information Portal")
 st.write("Parents can check their child's WA dates and topics.")
 
-# Load CSV file (using your exact filename)
+# Load CSV and skip the title row
 file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026(Sheet1).csv")
-df = pd.read_csv(file_path)
+df = pd.read_csv(file_path, skiprows=1)
 
 # Clean column names
 df.columns = df.columns.str.strip()
-
-# Ensure index numbers are integers
-df["Index Number"] = pd.to_numeric(df["Index Number"], errors="coerce")
-df = df.dropna(subset=["Index Number"])
-df["Index Number"] = df["Index Number"].astype(int)
 
 st.divider()
 
