@@ -10,7 +10,7 @@ st.write("Parents can check their child's WA dates and topics.")
 st.divider()
 
 # Load Excel file
-df = pd.read_excel("wa_information_2026.xlsx")
+df = pd.read_csv("wa_information_2026.csv")
 
 # Convert index numbers
 df["Index Number"] = df["Index Number"].astype(int)
