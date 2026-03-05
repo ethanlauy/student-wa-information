@@ -15,6 +15,9 @@ import os
 file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026.csv")
 df = pd.read_csv(file_path)
 
+# Clean column names
+df.columns = df.columns.str.strip()
+
 # Convert index numbers
 df["Index Number"] = df["Index Number"].astype(int)
 
