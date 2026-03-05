@@ -7,21 +7,12 @@ st.set_page_config(page_title="WA Information Portal", page_icon="📚")
 st.title("2026 WA Information Portal")
 st.write("Parents can check their child's WA dates and topics.")
 
-# Load CSV
+# Load CSV (skip the title row "2026 WA Information")
 file_path = os.path.join(os.path.dirname(__file__), "wa_information_2026.csv")
-df = pd.read_csv(file_path)
+df = pd.read_csv(file_path, skiprows=1)
 
-# Clean column names (remove spaces, weird characters)
+# Clean column names
 df.columns = df.columns.str.strip()
-
-# Show columns in logs (helps debugging)
-st.write("Loaded columns:", df.columns)
-
-# Rename columns safely
-df = df.rename(columns={
-    df.columns[0]: "Index Number",
-    df.columns[1]: "Class"
-})
 
 # Convert index numbers
 df["Index Number"] = pd.to_numeric(df["Index Number"], errors="coerce")
@@ -36,7 +27,7 @@ class_input = st.selectbox(
     sorted(df["Class"].unique())
 )
 
-# Filter students
+# Filter rows for class
 class_df = df[df["Class"] == class_input]
 
 # Parent selects index
